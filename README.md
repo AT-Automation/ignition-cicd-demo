@@ -1,65 +1,87 @@
 # Ignition Git & CI/CD demo
 
-Een zeer kleine trainingsrepository voor deze flow:
+Dit is een kleine, veilige oefenrepository. Je volgt één Perspective-view van een wijziging in VS Code naar een productie-Gateway.
 
-`VS Code → Git → feature/* → pull request → CI → merge naar main → production Gateway`.
+```mermaid
+flowchart LR
+  VS[VS Code] --> DEV[dev]
+  DEV -->|Pull Request| MAIN[main]
+  MAIN -->|Git tag| CD[Deploy naar productie]
+```
 
-Er is één Ignition 8.3 Perspective-project, één view en twee labels. `main` is de enige long-lived branch; alle werk gaat via short-lived `feature/*` branches en een PR.
+## De twee vaste branches
 
-## Vereisten
+- `dev` is de gezamenlijke ontwikkelbranch. Hier komen oefenwijzigingen samen.
+- `main` is de productiebranch. Alleen een geteste wijziging uit `dev` komt hier.
 
-- Docker Desktop met Docker Compose v2 en ten minste circa 3 GB vrij RAM
-- Git en VS Code
-- Bash (Git Bash of WSL) voor `scripts/*.sh`
-- Een GitHub-repository; GitHub CLI (`gh`) is optioneel
+Een release gebeurt niet zomaar bij elke merge. Nadat een PR van `dev` naar `main` groen is en gemerged is, hang je een tag zoals `v1.0.0` aan die `main`-commit. Die tag start de productie-deploy.
 
-De officiële Ignition-image is vastgezet op `inductiveautomation/ignition:8.3.8`. Maak geen productie-credentials onderdeel van Git.
+## Eenmalig: Gateways starten
 
-## Starten en stoppen
+Installeer Docker Desktop, Git, VS Code en Git Bash. Maak jouw lokale instellingenbestand:
 
 ```bash
 cp .env.example .env
-# wijzig ten minste GATEWAY_ADMIN_PASSWORD in .env
-docker compose up -d
-docker compose ps
 ```
 
-De lokale Gateway is [http://localhost:8088](http://localhost:8088); de production-demo is [http://localhost:8090](http://localhost:8090). De Perspective-pagina is na een scan bereikbaar op:
+Open `.env` en kies een eigen waarde voor `GATEWAY_ADMIN_PASSWORD`. Deel of commit dit bestand nooit.
 
-```text
-http://localhost:8088/data/perspective/client/demo-project/
-http://localhost:8090/data/perspective/client/demo-project/
-```
-
-Login met `GATEWAY_ADMIN_USERNAME` en `GATEWAY_ADMIN_PASSWORD` uit `.env`. Bij eerste start kan Ignition ongeveer twee minuten nodig hebben. Stoppen: `docker compose down`. Voeg alleen als een volledige, lokale reset gewenst is `--volumes` toe; dat verwijdert Gateway-state.
-
-De lokale Gateway bind-mount `./projects`, zodat bestanden direct op disk staan. Gebruik in de Gateway-webinterface **Platform → System → Projects → Scan File System** na een lokale edit, of maak een API key aan en run:
+Start vervolgens de Gateways:
 
 ```bash
-set -a; . ./.env; set +a
-bash scripts/deploy.sh
+docker compose up -d --wait
 ```
 
-Dat laatste deployt bewust naar de production-demo, niet naar local.
+Het eerste commando wacht totdat Ignition zelf `RUNNING` meldt. Daarna kun je openen:
 
-## CI en CD
+- Local Gateway: `http://localhost:8088`
+- Local Perspective-view: `http://localhost:8088/data/perspective/client/demo-project/`
+- Production Gateway: `http://localhost:8090`
 
-`ci.yml` draait op iedere PR naar `main` met `ubuntu-latest`: JSON/projectvalidatie en `ign-lint==0.6.1` op elke Perspective `view.json`.
+Stoppen:
 
-`deploy-production.yml` draait op een push naar `main` die project/deploy-bestanden wijzigt. Het gebruikt expres een self-hosted runner met label `ignition-demo`: alleen die kan de Docker-container op de trainingsmachine bereiken. De workflow kopieert uitsluitend `demo-project`, roept de project-scan API aan en controleert `/StatusPing`.
+```bash
+docker compose down
+```
 
-Stel in GitHub **Settings → Environments → production** in:
+## Eenmalig: branches maken
+
+Nadat je `main` naar GitHub hebt gepusht, maak je één keer `dev`:
+
+```bash
+git switch main
+git push -u origin main
+git switch -c dev
+git push -u origin dev
+```
+
+## Wat doen CI en CD?
+
+```mermaid
+flowchart LR
+  PR[PR dev naar main] --> CI[JSON + Perspective linter]
+  CI --> MERGE[Merge naar main]
+  MERGE --> TAG[Tag v1.0.0]
+  TAG --> CD[Production deploy]
+```
+
+- **CI** controleert de bestanden vóór de merge.
+- **CD** kopieert de bestanden van de getagde `main`-commit naar de productiecontainer en vraagt Ignition daarna om een projectscan.
+
+## Eenmalig: GitHub voor productie instellen
+
+De production-deploy draait op een self-hosted GitHub Actions-runner op dezelfde computer als Docker. Geef de runner de labels `self-hosted,ignition-demo`; de runner moet `docker ps` kunnen uitvoeren.
+
+Maak in GitHub bij **Settings → Environments → production**:
 
 | Type | Naam | Waarde |
 | --- | --- | --- |
-| Secret | `IGNITION_API_KEY` | API key van production Gateway (Gateway → Config → Security → API Keys) |
+| Secret | `IGNITION_API_KEY` | API key van de production Gateway |
 | Variable | `IGNITION_CONTAINER` | optioneel; standaard `ignition-demo-production` |
-| Variable | `IGNITION_URL` | optioneel; standaard `http://localhost:8090` voor een host-runner |
+| Variable | `IGNITION_URL` | optioneel; standaard `http://localhost:8090` |
 
-Registreer daarnaast op de Docker-host een self-hosted GitHub Actions runner met labels `self-hosted,ignition-demo`; de runnergebruiker moet `docker ps` kunnen uitvoeren. Gebruik de registratie-opdracht die GitHub onder **Settings → Actions → Runners → New self-hosted runner** voor deze repository toont. Een container-runner op hetzelfde Compose-netwerk gebruikt als URL `http://ignition-production:8088`; voor de eenvoudige host-runner is de standaard juist `http://localhost:8090`.
+Maak de API key in de production Gateway via **Config → Security → API Keys**. Bewaar hem alleen als GitHub Secret.
 
-## Resource-hygiëne
+## De demo geven
 
-`resource.json` is een Ignition-manifest en niet het lesmateriaal. Bewerk in de demo alleen de twee afzonderlijke `props.text`-regels in `view.json`. Gebruik geen Designer-save tussen de twee Git-wijzigingen: Ignition kan manifest-attributen opnieuw stempelen, wat afleidende metadata-diffs oplevert. Als dat toch gebeurt, herstel alleen het manifest naar de branchversie met `git restore projects/demo-project/.../resource.json` vóór je commit; behoud je beoogde `view.json`-wijziging.
-
-Zie [DEMO.md](DEMO.md) voor het letterlijk uitvoerbare draaiboek.
+Open [DEMO.md](DEMO.md). De zeven korte bestanden zijn geschreven als een rustige guide: ze vertellen wat je ziet, waarom je een stap doet en welke commando’s je kunt kopiëren.
