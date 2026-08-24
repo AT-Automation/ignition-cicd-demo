@@ -1,0 +1,32 @@
+{
+  "_comment": "Small, didactic ign-lint rule set. Component names must be PascalCase.",
+  "NamePatternRule": {
+    "enabled": true,
+    "kwargs": {
+      "node_type_specific_rules": {
+        "component": {
+          "convention": "PascalCase",
+          "min_length": 2,
+          "severity": "error"
+        },
+        "property": {
+          "convention": "camelCase",
+          "min_length": 1,
+          "severity": "warning"
+        }
+      }
+    }
+  },
+  "BadComponentReferenceRule": {
+    "enabled": true,
+    "kwargs": {
+      "severity": "error"
+    }
+  },
+  "PollingIntervalRule": {
+    "enabled": true,
+    "kwargs": {
+      "minimum_interval": 1000
+    }
+  }
+}

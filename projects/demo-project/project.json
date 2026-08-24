@@ -1,0 +1,7 @@
+{
+  "title": "Git CI/CD Demo",
+  "description": "Minimal Perspective project for the Git & CI/CD training.",
+  "enabled": true,
+  "inheritable": false,
+  "parent": ""
+}

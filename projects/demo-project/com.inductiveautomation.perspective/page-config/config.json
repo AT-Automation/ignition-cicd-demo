@@ -1,0 +1,9 @@
+{
+  "pages": {
+    "/": {
+      "title": "Git CI/CD Demo",
+      "viewPath": "demo"
+    }
+  },
+  "sharedDocks": {}
+}

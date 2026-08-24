@@ -1,0 +1,76 @@
+{
+  "custom": {},
+  "params": {},
+  "props": {
+    "defaultSize": {
+      "height": 260,
+      "width": 640
+    }
+  },
+  "root": {
+    "children": [
+      {
+        "meta": {
+          "name": "Title"
+        },
+        "props": {
+          "style": {
+            "color": "#ffffff",
+            "fontSize": "28px",
+            "fontWeight": 700,
+            "padding": "24px 24px 8px 24px"
+          },
+          "text": "Git & CI/CD voor Ignition"
+        },
+        "type": "ia.display.label"
+      },
+      {
+        "meta": {
+          "name": "LabelMachine"
+        },
+        "props": {
+          "style": {
+            "backgroundColor": "#1f6feb",
+            "borderRadius": "6px",
+            "color": "#ffffff",
+            "fontSize": "22px",
+            "fontWeight": 600,
+            "margin": "16px 24px 8px 24px",
+            "padding": "16px"
+          },
+          "text": "Machine: Demo"
+        },
+        "type": "ia.display.label"
+      },
+      {
+        "meta": {
+          "name": "LabelStatus"
+        },
+        "props": {
+          "style": {
+            "backgroundColor": "#238636",
+            "borderRadius": "6px",
+            "color": "#ffffff",
+            "fontSize": "22px",
+            "fontWeight": 600,
+            "margin": "8px 24px 24px 24px",
+            "padding": "16px"
+          },
+          "text": "Status: Gereed"
+        },
+        "type": "ia.display.label"
+      }
+    ],
+    "meta": {
+      "name": "Root"
+    },
+    "props": {
+      "direction": "column",
+      "style": {
+        "backgroundColor": "#0d1117",
+        "height": "100%"
+      }
+    },
+    "type": "ia.container.flex"
+  }
+}

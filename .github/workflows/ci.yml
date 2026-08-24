@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-lint:
+    name: JSON validation and Perspective lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out pull request
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Perspective linter
+        run: python -m pip install ign-lint==0.6.1
+
+      - name: Validate JSON and demo structure
+        run: bash scripts/validate.sh
+
+      - name: Lint Perspective views
+        run: ign-lint --config rule_config.json --files "projects/**/view.json"

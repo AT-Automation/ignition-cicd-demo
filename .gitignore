@@ -1,0 +1,20 @@
+.env
+.DS_Store
+Thumbs.db
+__pycache__/
+.venv/
+*.pyc
+
+# Gateway runtime state and metadata; the Git project is the source of truth.
+gateway-data/
+**/.resources/
+**/var/
+**/logs/
+**/db/
+**/certificates/
+**/keystore/
+**/config/local/
+**/config/resources/local/
+**/config/resources/core/ignition/api-token/
+**/config/resources/core/ignition/user-source/default/
+**/config/resources/core/ignition/identity-provider/default/
