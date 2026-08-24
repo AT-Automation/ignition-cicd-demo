@@ -1,62 +1,94 @@
 # 3. Ervaar en los een eenvoudig merge conflict op
 
-Eerst laten we bewust zien wat er gebeurt wanneer twee mensen rechtstreeks op dezelfde `dev`-branch werken. Dit is niet de prettigste manier van samenwerken, maar het maakt een conflict heel begrijpelijk.
+Voor een goed begrijpelijke conflict-demo hebben we geen tweede computer of tweede clone nodig. We maken op deze ene machine twee tijdelijke branches vanaf dezelfde `dev`-commit. Beide branches veranderen dezelfde statusregel. Wanneer we ze combineren, kan Git niet raden welke tekst de juiste is.
 
 ```mermaid
 flowchart TB
-  BASE[Dezelfde dev-commit] --> A[Persoon A<br/>Status: Productie]
-  BASE --> B[Persoon B<br/>Status: Storing]
-  A --> DEV[Push naar dev]
-  B --> REJECT[Push wordt geweigerd]
-  DEV --> CONFLICT[Merge conflict]
-  REJECT --> CONFLICT
+  DEV[Dezelfde dev-commit] --> A[demo/conflict-productie<br/>Status: Productie]
+  DEV --> B[demo/conflict-storing<br/>Status: Storing]
+  A --> MERGE[Merge A in B]
+  B --> MERGE
+  MERGE --> CONFLICT[Één conflict op de statusregel]
   CONFLICT --> FIX[Los op in VS Code]
 ```
 
-Gebruik voor persoon A en persoon B ieder een eigen clone van de repository. Beide personen beginnen vanaf dezelfde `dev`-commit.
+## Maak de eerste keuze
 
-## Persoon A doet dit
-
-Persoon A opent `view.json`, verandert alleen `Status: Gereed` naar `Status: Productie` en voert uit:
+We beginnen op `dev` en maken een tijdelijke branch voor `Status: Productie`:
 
 ```bash
 git switch dev
 git pull origin dev
-git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
-git commit -m "demo: persoon A kiest productie"
-git push origin dev
+git switch -c demo/conflict-productie
 ```
 
-## Persoon B doet tegelijk dit
+Open `view.json` in VS Code en verander alleen de tekst van `LabelStatus` naar:
 
-Persoon B heeft al dezelfde oude `dev`-commit open. Persoon B verandert alleen `Status: Gereed` naar `Status: Storing` en voert uit:
+```text
+Status: Productie
+```
+
+Leg die keuze vast:
+
+```bash
+git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
+git commit -m "demo: status productie"
+```
+
+## Maak de andere keuze
+
+Ga terug naar dezelfde `dev`-commit en maak de tweede tijdelijke branch:
 
 ```bash
 git switch dev
-git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
-git commit -m "demo: persoon B kiest storing"
-git push origin dev
+git switch -c demo/conflict-storing
 ```
 
-De laatste `git push` wordt geweigerd. Dat is goed: Git beschermt de wijziging van persoon A op de remote.
+Verander in hetzelfde bestand alleen de tekst van `LabelStatus` naar:
 
-Persoon B haalt nu eerst de wijziging van persoon A op en probeert die te combineren met de eigen commit:
-
-```bash
-git fetch origin
-git merge origin/dev
+```text
+Status: Storing
 ```
 
-Nu ontstaat één conflict bij de regel `Status: ...`. Open `view.json` in VS Code. Kies in de Merge Editor de gewenste eindwaarde, bijvoorbeeld `Status: Productie`, en sla op.
-
-We lossen het conflict zo op omdat Git niet kan weten welke van de twee verschillende statussen de juiste is.
-
-Voer daarna uit:
+Leg ook deze keuze vast:
 
 ```bash
 git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
-git commit -m "merge: choose final status"
+git commit -m "demo: status storing"
+```
+
+## Laat Git beide keuzes combineren
+
+Nu vragen we Git om de productie-keuze in de storing-branch te mergen:
+
+```bash
+git merge demo/conflict-productie
+```
+
+Git toont nu één conflict in `view.json`, precies op de regel met `Status: ...`.
+
+Open het bestand in VS Code. In de Merge Editor zie je:
+
+- **Current Change**: `Status: Storing`
+- **Incoming Change**: `Status: Productie`
+
+Kies de gewenste eindwaarde, bijvoorbeeld `Status: Productie`, en sla het bestand op. We lossen dit handmatig op omdat Git niet kan weten welke status inhoudelijk juist is.
+
+Rond de oplossing af:
+
+```bash
+git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
+git commit -m "merge: kies definitieve status"
+```
+
+## Breng de opgeloste keuze naar `dev`
+
+De branch bevat nu de oplossing. Voeg die toe aan de gezamenlijke ontwikkelbranch:
+
+```bash
+git switch dev
+git merge demo/conflict-storing
 git push origin dev
 ```
 
-Alleen de statusregel had een conflict. Dat is precies waarom kleine, duidelijke wijzigingen zo prettig zijn.
+Alleen de statusregel had een conflict. `LabelMachine` bleef volledig buiten het conflict. In de volgende stap zien we hoe feature branches en Pull Requests dit soort samenwerking beter beheersbaar maken.

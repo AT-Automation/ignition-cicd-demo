@@ -17,7 +17,16 @@ Open de Local Gateway en log in:
 http://localhost:8088
 ```
 
-Ga naar **Platform → Security → API Keys** en maak een nieuwe API key. Geef hem bijvoorbeeld de naam `local-project-scan`. Belangrijk is dat `Require secure connections for API Keys = False`  moet zijn. Kopieer de volledige key direct, want na het aanmaken is hij niet opnieuw zichtbaar.
+Ga naar **Platform → Security → API Keys** en maak een nieuwe API key. Geef hem bijvoorbeeld de naam `local-project-scan`. Belangrijk is dat `Require secure connections for API Keys = False` moet zijn. Kopieer de volledige key direct, want na het aanmaken is hij niet opnieuw zichtbaar.
+
+De key heeft ook een schrijfrecht nodig voor de scan. Dit stel je één keer als volgt in:
+
+1. Ga naar **Platform → Security → Levels** en maak onder `Public` een nieuw level, bijvoorbeeld `ApiScan`.
+2. Ga naar **Platform → Security → General Settings**.
+3. Zoek **Gateway Write Permissions**, kies `at least one of` en selecteer `ApiScan`.
+4. Ga naar **Platform → Security → API Keys** en maak een nieuwe API key en geef hem bijvoorbeeld de naam `local-project-scan`. Zet **Require secure connections for API Keys** naar False en selecteer onder **Security Level** `ApiScan`. Kopieer de volledige key direct, want na het aanmaken is hij niet opnieuw zichtbaar.
+
+Alleen `Authenticated` is niet voldoende voor deze schrijfactie. Zonder het schrijfrecht geeft de scan HTTP 403 terug.
 
 Open `.env` in VS Code en vul deze regel in:
 
@@ -28,6 +37,12 @@ IGNITION_API_KEY_LOCAL=plak-hier-de-volledige-api-key
 Sla `.env` op. Dit bestand staat in `.gitignore`, dus de key komt niet in Git terecht.
 
 ## Maak de wijziging
+
+Open de production-view en om de oorspronkelijke pagina te zien:
+
+```text
+http://localhost:8088/data/perspective/client/demo-project/
+```
 
 Ga terug naar `view.json`. Verander alleen deze tekst:
 

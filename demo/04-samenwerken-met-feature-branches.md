@@ -22,6 +22,8 @@ Persoon A verandert alleen `Machine: Oefening` naar `Machine: Menglijn 02`.
 git switch dev
 git pull origin dev
 git switch -c feature/a-machine
+```
+```bash
 git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
 git commit -m "feat: persoon A changes machine"
 git push -u origin feature/a-machine
@@ -42,6 +44,8 @@ Persoon B verandert alleen `Status: Productie` naar `Status: In bedrijf`.
 git switch dev
 git pull origin dev
 git switch -c feature/b-status
+```
+```bash
 git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
 git commit -m "feat: persoon B changes status"
 git push -u origin feature/b-status
