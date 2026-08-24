@@ -2,12 +2,8 @@ name: Deploy production
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "projects/**"
-      - "scripts/deploy.sh"
-      - ".github/workflows/deploy-production.yml"
-  workflow_dispatch:
+    tags:
+      - "v*"
 
 permissions:
   contents: read
@@ -28,8 +24,16 @@ jobs:
       IGNITION_URL: ${{ vars.IGNITION_URL || 'http://localhost:8090' }}
       IGNITION_API_KEY: ${{ secrets.IGNITION_API_KEY }}
     steps:
-      - name: Check out merged main
+      - name: Check out release tag
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on main
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
 
       - name: Verify prerequisites
         run: |

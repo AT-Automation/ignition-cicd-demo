@@ -10,13 +10,14 @@ services:
       GATEWAY_ADMIN_USERNAME: "${GATEWAY_ADMIN_USERNAME:-admin}"
       GATEWAY_ADMIN_PASSWORD: "${GATEWAY_ADMIN_PASSWORD:?Set GATEWAY_ADMIN_PASSWORD in .env}"
       IGNITION_EDITION: "${IGNITION_EDITION:-standard}"
+      DISABLE_QUICKSTART: "true"
       TZ: "${TZ:-Europe/Amsterdam}"
     command: -n ignition-demo-local -a localhost -h 8088 -s 8043
     volumes:
       - ignition-local-data:/usr/local/bin/ignition/data
       - ./projects:/usr/local/bin/ignition/data/projects
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8088/StatusPing"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8088/StatusPing | grep -q '\"state\":\"RUNNING\"'"]
       interval: 20s
       timeout: 5s
       retries: 12
@@ -33,7 +34,7 @@ services:
     volumes:
       - ignition-production-data:/usr/local/bin/ignition/data
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8088/StatusPing"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8088/StatusPing | grep -q '\"state\":\"RUNNING\"'"]
       interval: 20s
       timeout: 5s
       retries: 12
