@@ -29,8 +29,5 @@ jobs:
       - name: Install Perspective linter
         run: python -m pip install ign-lint==0.6.1
 
-      - name: Validate JSON and demo structure
+      - name: Validate project and Perspective view
         run: bash scripts/validate.sh
-
-      - name: Lint Perspective views
-        run: ign-lint --config rule_config.json --files "projects/**/view.json"

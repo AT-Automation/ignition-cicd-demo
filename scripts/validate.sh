@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Fast local counterpart of CI: JSON parsing plus the Perspective linter when installed.
+# Run the same project checks locally and in CI.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-python3 - <<'PY'
+echo "Check 1/2: project-JSON en vereiste Perspective-labels"
+
+if python3 - <<'PY'
 import json
 from pathlib import Path
 
@@ -30,9 +32,23 @@ if missing:
     raise SystemExit("Demo labels missing from view.json: " + ", ".join(sorted(missing)))
 print("JSON and required Perspective labels: OK")
 PY
+then
+  echo "PASS: project-JSON en vereiste Perspective-labels zijn geldig."
+else
+  status=$?
+  echo "FAIL: project-JSON of vereiste Perspective-labels zijn ongeldig." >&2
+  exit "$status"
+fi
 
 if command -v ign-lint >/dev/null 2>&1; then
-  ign-lint --config rule_config.json --files "projects/**/view.json"
+  echo "Check 2/2: Perspective lint"
+  if ign-lint --config rule_config.json --files "projects/**/view.json"; then
+    echo "PASS: Perspective lint."
+  else
+    status=$?
+    echo "FAIL: Perspective lint." >&2
+    exit "$status"
+  fi
 else
-  echo "ign-lint not installed locally (CI installs ign-lint==0.6.1)."
+  echo "SKIP: Perspective lint; ign-lint is niet lokaal geïnstalleerd."
 fi
