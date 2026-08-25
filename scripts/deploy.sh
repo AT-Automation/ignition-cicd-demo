@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
-# File-based production deploy. Run by the self-hosted Actions runner or locally.
+# File-based production deploy. Run by the short-lived Compose runner.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
+
+# The runner mounts the ignored local .env at /runner-env/.env. A locally run
+# troubleshooting command can use the repository's .env instead. An explicitly
+# exported value always wins.
+if [ -z "${IGNITION_API_KEY:-}" ]; then
+  for env_file in /runner-env/.env .env; do
+    if [ -f "$env_file" ]; then
+      IGNITION_API_KEY="$(sed -n 's/^IGNITION_API_KEY=//p' "$env_file" | head -n 1 | tr -d '\r')"
+      [ -n "$IGNITION_API_KEY" ] && export IGNITION_API_KEY && break
+    fi
+  done
+fi
 
 container="${IGNITION_CONTAINER:-ignition-demo-production}"
 gateway_url="${IGNITION_URL:-http://localhost:8090}"
