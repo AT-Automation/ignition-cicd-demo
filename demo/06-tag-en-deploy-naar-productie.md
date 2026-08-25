@@ -1,4 +1,4 @@
-# 7. Maak een Git tag en deploy naar productie
+# 6. Maak een Git tag en deploy naar productie
 
 Nu maken we van de geteste `main`-commit een release. Een tag is een vaste naam voor precies één commit, bijvoorbeeld `v1.0.0`. De production-workflow start alleen bij een tag die begint met `v`.
 

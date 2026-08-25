@@ -81,3 +81,9 @@ git push origin dev
 ```
 
 Hier zie je het verschil tussen een lokale Ignition-scan en Git: de scan maakt de wijziging direct zichtbaar op jouw lokale Gateway; de commit en push delen de wijziging met `dev` op GitHub.
+
+## Zonder script: scan in de Gateway
+
+Je kunt dezelfde **projectscan** ook handmatig uitvoeren. Ga in de Local Gateway naar **Platform → System → Projects** en klik rechtsboven op **Scan File System**. Dat laat Ignition de bestanden in `data/projects` opnieuw inlezen, net als `bash scripts/scan-local.sh`.
+
+Deze knop is handig als je de scan eerst zichtbaar in de Gateway wilt uitvoeren of als je geen API key wilt gebruiken. Gebruik niet de knop **Scan File System** op **Platform → System → Modes** voor deze oefening: die scant de Gateway-configuratie. Deze demo beheert en synchroniseert alleen het Perspective-project, geen volledige Gateway-configuratie.
