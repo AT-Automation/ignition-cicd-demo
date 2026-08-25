@@ -40,6 +40,28 @@ services:
       retries: 12
       start_period: 90s
 
+  # Starts only for the release demo. It registers as a one-job GitHub Actions
+  # runner, deploys through the shared Docker daemon, then exits and removes
+  # itself from GitHub. `docker compose ... rm` removes the stopped container.
+  github-runner:
+    image: myoung34/github-runner:latest
+    container_name: ignition-demo-runner
+    profiles: ["demo-cd"]
+    restart: "no"
+    environment:
+      # Defaults keep the regular Gateway-only `docker compose up` usable.
+      # Step 6 supplies both values before explicitly starting this profile.
+      REPO_URL: "${RUNNER_REPO_URL:-}"
+      ACCESS_TOKEN: "${RUNNER_GITHUB_PAT:-}"
+      RUNNER_NAME: "${RUNNER_NAME:-ignition-demo-once}"
+      RUNNER_SCOPE: repo
+      LABELS: "self-hosted,ignition-demo"
+      EPHEMERAL: "true"
+      DISABLE_AUTO_UPDATE: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./.env:/runner-env/.env:ro
+
 volumes:
   ignition-local-data:
   ignition-production-data:

@@ -68,19 +68,23 @@ flowchart LR
 - **CI** controleert de bestanden vóór de merge.
 - **CD** kopieert de bestanden van de getagde `main`-commit naar de productiecontainer en vraagt Ignition daarna om een projectscan.
 
-## Eenmalig: GitHub voor productie instellen
+## Eenmalig: automatische productie-deploy instellen
 
-De production-deploy draait op een self-hosted GitHub Actions-runner op dezelfde computer als Docker. Geef de runner de labels `self-hosted,ignition-demo`; de runner moet `docker ps` kunnen uitvoeren.
+Voor de productie-deploy start Docker tijdelijk een self-hosted GitHub Actions-runner. Die heeft toegang tot dezelfde Docker daemon als de Gateway, voert precies één release-job uit en stopt daarna. Je hoeft in GitHub dus geen runner via de webinterface te registreren.
 
-Maak in GitHub bij **Settings → Environments → production**:
+Stel de twee verschillende sleutels in deze volgorde in:
 
-| Type | Naam | Waarde |
-| --- | --- | --- |
-| Secret | `IGNITION_API_KEY` | API key van de production Gateway |
-| Variable | `IGNITION_CONTAINER` | optioneel; standaard `ignition-demo-production` |
-| Variable | `IGNITION_URL` | optioneel; standaard `http://localhost:8090` |
+1. Maak na het starten van de production Gateway via **Config → Security → API Keys** een **Ignition API key**. `scripts/deploy.sh` gebruikt die alleen om Ignition na het kopiëren om een beveiligde projectscan te vragen.
+2. Maak in GitHub via **Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token (classic)** een **GitHub Personal Access Token (PAT)**. Dit is een GitHub API-toegangstoken, geen Ignition-key. Kies nadrukkelijk **niet** voor een fine-grained token en vink bij de classic token de volledige scope **`repo`** aan. De tijdelijke runnercontainer gebruikt deze PAT om bij GitHub een kortlevende registratie voor precies deze repository aan te vragen.
+3. Zet beide sleutels en de repository-URL alleen in jouw lokale `.env`:
 
-Maak de API key in de production Gateway via **Config → Security → API Keys**. Bewaar hem alleen als GitHub Secret.
+```text
+IGNITION_API_KEY=jouw-productie-api-key
+RUNNER_REPO_URL=https://github.com/jouw-gebruikersnaam/ignition-cicd-demo
+RUNNER_GITHUB_PAT=ghp_jouw_token
+```
+
+`.env` staat in `.gitignore`; commit of deel deze waarden niet. Na de demo kun je de runnercontainer verwijderen en de GitHub PAT intrekken.
 
 ## De demo geven
 
