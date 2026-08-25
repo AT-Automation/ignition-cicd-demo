@@ -14,6 +14,14 @@ flowchart LR
 
 Controleer vóór deze stap dat GitHub Actions voor de repository aan staat. Ga op GitHub naar **Settings → Actions → General**, kies onder **Actions permissions** voor **Allow all actions and reusable workflows** en sla op. In een organisatie kan deze keuze door een organisatiebeleid zijn vastgezet.
 
+De Pull Requests uit stap 4 zijn inmiddels op GitHub samengevoegd naar `dev`. Haal die wijzigingen eerst lokaal op voordat je op `dev` verderwerkt:
+
+```bash
+git fetch origin
+git switch dev
+git pull --ff-only origin dev
+```
+
 Je hoeft de workflow niet eerst naar `main` te mergen: een `pull_request`-workflow op `dev` draait voor een PR van `dev` naar `main`. De workflow moet wel in de commit staan die je naar `dev` pusht.
 
 Open `.github/workflows/ci.yml` in VS Code. Vervang dit blok:
@@ -44,7 +52,6 @@ De JSON blijft daarbij bewust geldig. In de GitHub Actions-log zie je daarom **C
 Zet beide wijzigingen op `dev`:
 
 ```bash
-git switch dev
 git add .github/workflows/ci.yml
 git add projects/demo-project/com.inductiveautomation.perspective/views/demo/view.json
 git commit -m "ci: enable pull request checks"

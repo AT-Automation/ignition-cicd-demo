@@ -16,6 +16,14 @@ flowchart LR
 
 Een release gebeurt niet zomaar bij elke merge. Nadat een PR van `dev` naar `main` groen is en gemerged is, hang je een tag zoals `v1.0.0` aan die `main`-commit. Die tag start de productie-deploy.
 
+## Eerst: de remote `dev`-branch lokaal ophalen
+
+Voer dit uit voordat je iets anders doet in deze repository:
+
+```bash
+git fetch origin dev:dev
+```
+
 ## Eenmalig: Gateways starten
 
 Installeer Docker Desktop, Git, VS Code en Git Bash. Maak jouw lokale instellingenbestand:
